@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>青春向党 · 不负韶华</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0000; }
+
+  /* ===== Deck-stage Section Rules ===== */
+  deck-stage > section {
+    overflow: hidden; position: relative;
+    font-family: 'Noto Serif SC', 'SimSun', 'STSong', serif;
+  }
+  deck-stage > section:not(.active) { display: none !important; }
+  deck-stage > section.active { display: flex; align-items: center; justify-content: center; }
+
+  /* ===== Particle Canvas ===== */
+  #particleCanvas { position: fixed; inset: 0; z-index: 9999; pointer-events: none; }
+
+  /* ===== Slide Inner ===== */
+  .slide-inner {
+    width: 100%; height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 80px 120px;
+    position: relative; z-index: 1;
+  }
+
+  /* ===== Slide Backgrounds ===== */
+  .bg-dawn {
+    background:
+      radial-gradient(ellipse 90% 70% at 25% 15%, rgba(230,180,60,0.3) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 75% 85%, rgba(180,55,40,0.18) 0%, transparent 45%),
+      linear-gradient(175deg, #0b0604 0%, #180b05 28%, #2a1010 58%, #1a0808 100%);
+  }
+  .bg-history {
+    background:
+      radial-gradient(ellipse 65% 50% at 50% 35%, rgba(175,45,38,0.22) 0%, transparent 58%),
+      radial-gradient(ellipse 45% 35% at 25% 75%, rgba(190,140,55,0.14) 0%, transparent 48%),
+      radial-gradient(ellipse 40% 30% at 75% 70%, rgba(190,140,55,0.1) 0%, transparent 48%),
+      linear-gradient(180deg, #180505 0%, #2a0a0a 28%, #1a0608 65%, #0c0305 100%);
+  }
+  .bg-growth {
+    background:
+      radial-gradient(ellipse 65% 50% at 70% 22%, rgba(220,175,65,0.28) 0%, transparent 52%),
+      radial-gradient(ellipse 50% 40% at 30% 72%, rgba(185,75,45,0.18) 0%, transparent 48%),
+      linear-gradient(172deg, #180904 0%, #2a1408 35%, #1a0c06 72%, #0d0503 100%);
+  }
+  .bg-faith {
+    background:
+      radial-gradient(ellipse 80% 55% at 50% 45%, rgba(190,28,38,0.28) 0%, transparent 58%),
+      radial-gradient(ellipse 35% 25% at 50% 18%, rgba(220,180,80,0.22) 0%, transparent 48%),
+      linear-gradient(180deg, #180202 0%, #2c0808 38%, #1e0606 100%);
+  }
+  .bg-call {
+    background:
+      radial-gradient(ellipse 60% 50% at 55% 30%, rgba(210,155,55,0.32) 0%, transparent 52%),
+      radial-gradient(ellipse 55% 45% at 35% 68%, rgba(195,38,35,0.24) 0%, transparent 48%),
+      linear-gradient(176deg, #1a0504 0%, #2b0d06 28%, #1a0808 62%, #0c0303 100%);
+  }
+  .bg-oath {
+    background:
+      radial-gradient(ellipse 75% 60% at 50% 38%, rgba(195,38,35,0.32) 0%, transparent 58%),
+      radial-gradient(ellipse 50% 40% at 50% 18%, rgba(230,190,70,0.26) 0%, transparent 42%),
+      radial-gradient(ellipse 60% 35% at 50% 85%, rgba(180,130,45,0.16) 0%, transparent 42%),
+      linear-gradient(180deg, #1a0202 0%, #2e0808 28%, #1e0505 68%, #0c0101 100%);
+  }
+
+  /* ===== Typography ===== */
+  .section-num {
+    font-family: 'Noto Sans SC', sans-serif; font-size: 17px; font-weight: 300;
+    letter-spacing: 0.45em; color: rgba(212,168,67,0.7); margin-bottom: 28px;
+  }
+  .main-title {
+    font-family: 'Noto Serif SC', serif; font-size: 90px; font-weight: 900;
+    color: #f5e6c8; text-align: center; line-height: 1.22; letter-spacing: 0.07em;
+    text-shadow: 0 0 100px rgba(212,168,67,0.35), 0 0 200px rgba(200,40,30,0.2), 0 3px 6px rgba(0,0,0,0.6);
+  }
+  .main-title.gold {
+    color: #ecd690;
+    text-shadow: 0 0 120px rgba(225,185,85,0.5), 0 0 240px rgba(200,45,35,0.25), 0 3px 8px rgba(0,0,0,0.7);
+    font-size: 100px;
+  }
+  .subtitle {
+    font-family: 'Noto Serif SC', serif; font-size: 44px; font-weight: 600;
+    color: rgba(230,200,150,0.7); letter-spacing: 0.18em; text-align: center; margin-bottom: 16px;
+  }
+  .quote {
+    font-family: 'Noto Serif SC', serif; font-size: 52px; font-weight: 700;
+    color: #f0d890; text-align: center; line-height: 1.5; letter-spacing: 0.06em;
+    text-shadow: 0 0 70px rgba(200,160,60,0.35); max-width: 1400px;
+  }
+  .verse {
+    font-family: 'Noto Serif SC', serif; font-size: 32px; font-weight: 400;
+    color: rgba(240,220,180,0.82); text-align: center; line-height: 2;
+    letter-spacing: 0.05em; max-width: 1200px;
+  }
+  .attribution {
+    font-family: 'Noto Sans SC', sans-serif; font-size: 20px; font-weight: 300;
+    color: rgba(200,170,120,0.6); margin-top: 36px; letter-spacing: 0.1em;
+  }
+  .highlight { color: #f2da90; font-weight: 700; }
+
+  /* ===== Decorative Lines ===== */
+  .gold-line {
+    width: 140px; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(212,168,67,0.75), transparent);
+    margin: 20px auto;
+  }
+  .gold-line-wide { width: 300px; }
+
+  /* ===== Corners ===== */
+  .corner {
+    position: absolute; width: 50px; height: 50px;
+    border-color: rgba(212,168,67,0.35); border-style: solid; pointer-events: none;
+  }
+  .corner-tl { top: 50px; left: 50px; border-width: 2px 0 0 2px; }
+  .corner-tr { top: 50px; right: 50px; border-width: 2px 2px 0 0; }
+  .corner-bl { bottom: 50px; left: 50px; border-width: 0 0 2px 2px; }
+  .corner-br { bottom: 50px; right: 50px; border-width: 0 2px 2px 0; }
+
+  /* ===== Light Rays ===== */
+  .light-rays {
+    position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg, transparent 5deg,
+      rgba(212,168,67,0.04) 6deg, transparent 7deg,
+      transparent 18deg, transparent 20deg,
+      rgba(212,168,67,0.03) 22deg, transparent 23deg,
+      transparent 42deg, transparent 44deg,
+      rgba(212,168,67,0.05) 46deg, transparent 47deg,
+      transparent 65deg, transparent 67deg,
+      rgba(212,168,67,0.03) 69deg, transparent 70deg,
+      transparent 88deg, transparent 90deg,
+      rgba(212,168,67,0.04) 92deg, transparent 93deg,
+      transparent 120deg, transparent 125deg,
+      rgba(212,168,67,0.025) 128deg, transparent 129deg,
+      transparent 155deg, transparent 160deg,
+      rgba(212,168,67,0.03) 165deg, transparent 166deg,
+      transparent 200deg, transparent 205deg,
+      rgba(212,168,67,0.035) 210deg, transparent 211deg,
+      transparent 245deg, transparent 250deg,
+      rgba(212,168,67,0.025) 255deg, transparent 256deg,
+      transparent 290deg, transparent 295deg,
+      rgba(212,168,67,0.03) 300deg, transparent 301deg,
+      transparent 330deg, transparent 335deg,
+      rgba(212,168,67,0.035) 340deg, transparent 341deg,
+      transparent 355deg, transparent 360deg
+    );
+    animation: rotateRays 55s linear infinite;
+  }
+  @keyframes rotateRays { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* ===== Light Pillars ===== */
+  .light-pillar {
+    position: absolute; bottom: 0; pointer-events: none; z-index: 0;
+    width: 3px; background: linear-gradient(0deg, rgba(230,190,80,0.25) 0%, transparent 100%);
+    animation: pillarPulse 3s ease-in-out infinite;
+  }
+  @keyframes pillarPulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(0.8); }
+    50% { opacity: 0.8; transform: scaleY(1.2); }
+  }
+
+  /* ===== Tiananmen Bottom ===== */
+  .tiananmen-wrap {
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    pointer-events: none; z-index: 2; opacity: 0.3;
+  }
+
+  /* ===== Oath Special ===== */
+  .oath-text {
+    font-family: 'Noto Serif SC', serif; font-size: 68px; font-weight: 900;
+    color: #f5d880; text-align: center; letter-spacing: 0.1em;
+    text-shadow: 0 0 120px rgba(230,180,60,0.55), 0 0 250px rgba(200,40,35,0.35), 0 4px 10px rgba(0,0,0,0.7);
+    line-height: 1.35;
+  }
+  .oath-sub {
+    font-family: 'Noto Serif SC', serif; font-size: 30px;
+    color: rgba(240,210,160,0.72); letter-spacing: 0.12em; margin-top: 32px;
+  }
+
+  /* ===== Page decorations ===== */
+  .top-ornament {
+    position: absolute; top: 35px; left: 50%; transform: translateX(-50%);
+    pointer-events: none; z-index: 2; opacity: 0.5;
+  }
+  .bottom-ornament {
+    position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%);
+    pointer-events: none; z-index: 2; opacity: 0.5;
+  }
+
+  /* ===== Control Bar ===== */
+  #controlBar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 10001;
+    display: flex; align-items: center; justify-content: center; gap: 22px;
+    padding: 10px 22px;
+    background: linear-gradient(0deg, rgba(0,0,0,0.72) 0%, transparent 100%);
+    opacity: 0; transition: opacity 0.5s; pointer-events: none;
+  }
+  #controlBar.visible { opacity: 1; pointer-events: auto; }
+  #controlBar button {
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14);
+    color: rgba(255,255,255,0.78); padding: 7px 16px; border-radius: 20px;
+    cursor: pointer; font-family: 'Noto Sans SC', sans-serif; font-size: 12px;
+    letter-spacing: 0.04em; transition: all 0.3s; backdrop-filter: blur(6px);
+  }
+  #controlBar button:hover {
+    background: rgba(255,255,255,0.16); border-color: rgba(212,168,67,0.45); color: #e8cc88;
+  }
+  #controlBar button.active {
+    background: rgba(196,30,42,0.35); border-color: rgba(212,168,67,0.55); color: #f5e6c8;
+  }
+  #controlBar .divider { width: 1px; height: 14px; background: rgba(255,255,255,0.12); }
+  #controlBar .timer-display {
+    color: rgba(255,255,255,0.5); font-family: 'Noto Sans SC', sans-serif;
+    font-size: 11px; letter-spacing: 0.04em; min-width: 50px; text-align: center;
+  }
+
+  /* ===== Start Overlay ===== */
+  #startOverlay {
+    position: fixed; inset: 0; z-index: 10002; cursor: pointer;
+    background: radial-gradient(ellipse at center, #1a0505 0%, #080000 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: opacity 0.8s;
+  }
+  #startOverlay.fadeout { opacity: 0; pointer-events: none; }
+  #startOverlay h2 {
+    font-family: 'Noto Serif SC', serif; font-size: 52px; font-weight: 900;
+    color: #f5e6c8; letter-spacing: 0.1em; margin-bottom: 12px;
+    text-shadow: 0 0 60px rgba(212,168,67,0.4);
+  }
+  #startOverlay .start-sub {
+    font-family: 'Noto Sans SC', sans-serif; font-size: 17px;
+    color: rgba(200,170,120,0.7); letter-spacing: 0.16em; margin-bottom: 48px;
+  }
+  #startOverlay .start-hint {
+    font-family: 'Noto Sans SC', sans-serif; font-size: 14px;
+    color: rgba(255,255,255,0.4); letter-spacing: 0.08em; animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; } 50% { opacity: 0.9; }
+  }
+
+  /* ===== Music Toast ===== */
+  #musicToast {
+    position: fixed; top: 24px; left: 50%; transform: translateX(-50%); z-index: 10003;
+    background: rgba(0,0,0,0.72); border: 1px solid rgba(212,168,67,0.3);
+    color: rgba(240,210,160,0.9); padding: 9px 22px; border-radius: 24px;
+    font-family: 'Noto Sans SC', sans-serif; font-size: 12px; letter-spacing: 0.04em;
+    opacity: 0; transition: opacity 0.5s; pointer-events: none; backdrop-filter: blur(6px);
+  }
+  #musicToast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- ===== SVG Sprite Sheet ===== -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Tiananmen Gate -->
+    <g id="tiananmen">
+      <!-- Base platform -->
+      <rect x="60" y="440" width="1080" height="40" rx="2" fill="rgba(212,168,67,0.5)"/>
+      <rect x="40" y="425" width="1120" height="20" rx="1" fill="rgba(212,168,67,0.35)"/>
+      <!-- Side walls -->
+      <rect x="60" y="260" width="240" height="170" fill="rgba(200,140,60,0.25)"/>
+      <rect x="900" y="260" width="240" height="170" fill="rgba(200,140,60,0.25)"/>
+      <!-- Side wall columns -->
+      <g fill="rgba(180,130,55,0.2)">
+        <rect x="80" y="270" width="8" height="150"/><rect x="110" y="270" width="8" height="150"/>
+        <rect x="140" y="270" width="8" height="150"/><rect x="170" y="270" width="8" height="150"/>
+        <rect x="200" y="270" width="8" height="150"/><rect x="230" y="270" width="8" height="150"/>
+        <rect x="260" y="270" width="8" height="150"/>
+      </g>
+      <g fill="rgba(180,130,55,0.2)">
+        <rect x="920" y="270" width="8" height="150"/><rect x="950" y="270" width="8" height="150"/>
+        <rect x="980" y="270" width="8" height="150"/><rect x="1010" y="270" width="8" height="150"/>
+        <rect x="1040" y="270" width="8" height="150"/><rect x="1070" y="270" width="8" height="150"/>
+        <rect x="1100" y="270" width="8" height="150"/>
+      </g>
+      <!-- Central tower base -->
+      <rect x="330" y="240" width="540" height="190" fill="rgba(200,140,60,0.3)"/>
+      <!-- Central tower columns (10) -->
+      <g fill="rgba(180,130,55,0.25)">
+        <rect x="345" y="255" width="9" height="165"/><rect x="380" y="255" width="9" height="165"/>
+        <rect x="415" y="255" width="9" height="165"/><rect x="450" y="255" width="9" height="165"/>
+        <rect x="485" y="255" width="9" height="165"/><rect x="520" y="255" width="9" height="165"/>
+        <rect x="555" y="255" width="9" height="165"/><rect x="590" y="255" width="9" height="165"/>
+        <rect x="625" y="255" width="9" height="165"/><rect x="660" y="255" width="9" height="165"/>
+        <rect x="695" y="255" width="9" height="165"/><rect x="730" y="255" width="9" height="165"/>
+        <rect x="765" y="255" width="9" height="165"/><rect x="800" y="255" width="9" height="165"/>
+        <rect x="835" y="255" width="9" height="165"/>
+      </g>
+      <!-- Five arches in central section -->
+      <g fill="none" stroke="rgba(212,168,67,0.45)" stroke-width="2.5">
+        <path d="M400,430 L400,370 Q420,345 440,370 L440,430"/>
+        <path d="M475,430 L475,360 Q500,330 525,360 L525,430"/>
+        <path d="M560,430 L560,350 Q600,315 640,350 L640,430"/>
+        <path d="M675,430 L675,360 Q700,330 725,360 L725,430"/>
+        <path d="M760,430 L760,370 Q780,345 800,370 L800,430"/>
+      </g>
+      <!-- Mao portrait -->
+      <rect x="555" y="280" width="90" height="110" rx="3" fill="none" stroke="rgba(212,168,67,0.5)" stroke-width="2"/>
+      <rect x="560" y="285" width="80" height="100" rx="2" fill="rgba(212,168,67,0.12)"/>
+      <!-- Slogan placards -->
+      <rect x="310" y="290" width="18" height="70" rx="2" fill="rgba(212,168,67,0.25)"/>
+      <rect x="872" y="290" width="18" height="70" rx="2" fill="rgba(212,168,67,0.25)"/>
+      <!-- Roof base beam -->
+      <rect x="320" y="225" width="560" height="18" fill="rgba(200,150,60,0.4)"/>
+      <rect x="50" y="242" width="260" height="12" fill="rgba(200,150,60,0.3)"/>
+      <rect x="890" y="242" width="260" height="12" fill="rgba(200,150,60,0.3)"/>
+      <!-- Roof - lower eave -->
+      <path d="M300,225 L340,170 Q600,130 860,170 L900,225 Z" fill="rgba(220,170,70,0.3)"/>
+      <!-- Roof - upper eave -->
+      <path d="M330,170 L360,120 Q600,82 840,120 L870,170 Z" fill="rgba(220,170,70,0.35)"/>
+      <!-- Roof ridge -->
+      <line x1="380" y1="120" x2="820" y2="120" stroke="rgba(230,180,80,0.4)" stroke-width="3"/>
+      <!-- Roof corner ornaments -->
+      <circle cx="360" cy="120" r="8" fill="rgba(230,180,80,0.5)"/>
+      <circle cx="840" cy="120" r="8" fill="rgba(230,180,80,0.5)"/>
+      <!-- Side roof sections -->
+      <path d="M40,240 L60,200 L300,200 L300,225 L50,242 Z" fill="rgba(220,170,70,0.2)"/>
+      <path d="M900,225 L900,200 L1140,200 L1160,240 L890,242 Z" fill="rgba(220,170,70,0.2)"/>
+      <!-- Balustrade -->
+      <g fill="rgba(200,150,60,0.3)">
+        <rect x="320" y="430" width="560" height="8"/>
+        <rect x="40" y="418" width="280" height="6"/>
+        <rect x="880" y="418" width="280" height="6"/>
+      </g>
+    </g>
+
+  </defs>
+</svg>
+
+<!-- ===== Particle Canvas ===== -->
+<canvas id="particleCanvas"></canvas>
+
+<!-- ===== Start Overlay ===== -->
+<div id="startOverlay" onclick="startPresentation()">
+  <h2>青春向党 · 不负韶华</h2>
+  <div class="start-sub">背景演示 · 朗诵配乐</div>
+  <div class="gold-line gold-line-wide"></div>
+  <div class="start-hint" style="margin-top:44px;">点击任意位置开始</div>
+</div>
+
+<!-- ===== Music Toast ===== -->
+<div id="musicToast">可拖放或点击「📂 配乐」加载背景音乐 (MP3/WAV)</div>
+
+<!-- ===== Control Bar ===== -->
+<div id="controlBar">
+  <button id="btnPrev">◀ 上一页</button>
+  <button id="btnAuto" class="active">⏯ 自动</button>
+  <button id="btnNext">下一页 ▶</button>
+  <div class="divider"></div>
+  <span class="timer-display" id="timerDisplay">30s</span>
+  <button id="btnSpeedDown">−</button>
+  <button id="btnSpeedUp">+</button>
+  <div class="divider"></div>
+  <button id="btnMusic">♪ 音乐</button>
+  <button id="btnLoadMusic">📂 配乐</button>
+</div>
+
+<input type="file" id="musicFileInput" accept="audio/*" style="display:none" onchange="handleMusicFile(this)">
+
+<!-- ===== DECK STAGE ===== -->
+<deck-stage>
+
+  <!-- ============ SLIDE 1: 晨曦·起点 ============ -->
+  <section data-screen-label="01 晨曦">
+    <div class="slide-inner bg-dawn">
+      <div class="light-rays"></div>
+      <!-- Tiananmen bottom -->
+      <div class="tiananmen-wrap" style="width:75%; bottom:-10px; opacity:0.28;">
+        <svg viewBox="0 0 1200 480" width="100%" height="auto" preserveAspectRatio="xMidYMax slice">
+          <use href="#tiananmen"/>
+        </svg>
+      </div>
+      <!-- Decorative -->
+      <div class="corner corner-tl"></div>
+      <div class="corner corner-tr"></div>
+      <div class="corner corner-bl"></div>
+      <div class="corner corner-br"></div>
+      <div class="section-num">第 一 章</div>
+      <div class="main-title gold">青春向党</div>
+      <div class="subtitle">不 负 韶 华</div>
+      <div class="gold-line"></div>
+      <p class="verse" style="margin-top:16px;">
+        当清晨的第一缕阳光洒向大地<br>
+        我们站在新时代的起点<br>
+        心中有理想，脚下有方向
+      </p>
+      <div class="attribution">青春是一团燃烧的火，一面迎风舒展的旗</div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 2: 回望·传承 ============ -->
+  <section data-screen-label="02 回望">
+    <div class="slide-inner bg-history">
+      <div class="light-rays"></div>
+      <!-- Tiananmen bottom -->
+      <div class="tiananmen-wrap" style="width:80%; bottom:-12px; opacity:0.22;">
+        <svg viewBox="0 0 1200 480" width="100%" height="auto" preserveAspectRatio="xMidYMax slice">
+          <use href="#tiananmen"/>
+        </svg>
+      </div>
+      <div class="corner corner-tl"></div>
+      <div class="corner corner-br"></div>
+      <div class="section-num">第 二 章</div>
+      <div class="quote">
+        回望来路<br>
+        一代代青年把个人理想<br>
+        融入民族复兴的洪流
+      </div>
+      <div class="gold-line"></div>
+      <p class="verse" style="font-size:27px;">
+        无数青春力量的汇聚，托举起民族前进的脊梁
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 3: 成长·担当 ============ -->
+  <section data-screen-label="03 成长">
+    <div class="slide-inner bg-growth">
+      <div class="light-rays" style="opacity:0.7;"></div>
+      <div class="corner corner-tl"></div>
+      <div class="corner corner-br"></div>
+      <div class="section-num">第 三 章</div>
+      <div class="quote" style="font-size:74px; margin-bottom:14px;">
+        少年强则国强
+      </div>
+      <div class="gold-line"></div>
+      <p class="verse">
+        青春的价值，不在于空谈远方，而在于脚踏实地<br>
+        不在于一时热情，而在于久久为功<br>
+        <span class="highlight">面对困难不退缩、面对挑战敢担当</span><br>
+        是新时代青年最亮丽的底色
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 4: 信念·行动 ============ -->
+  <section data-screen-label="04 信念">
+    <div class="slide-inner bg-faith">
+      <div class="light-rays"></div>
+      <div class="corner corner-tl"></div>
+      <div class="corner corner-tr"></div>
+      <div class="corner corner-bl"></div>
+      <div class="corner corner-br"></div>
+      <div class="section-num">第 四 章</div>
+      <div class="quote">
+        青春向党<br>
+        是信念的选择<br>
+        也是行动的回答
+      </div>
+      <div class="gold-line"></div>
+      <p class="verse" style="font-size:27px;">
+        把爱国之情化作报国之行<br>
+        把个人梦想融入中国梦
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 5: 号角·追梦 ============ -->
+  <section data-screen-label="05 号角">
+    <div class="slide-inner bg-call">
+      <div class="light-rays" style="animation-duration:35s; opacity:0.8;"></div>
+      <!-- Light pillars -->
+      <div class="light-pillar" style="left:15%; height:55%; animation-delay:0s;"></div>
+      <div class="light-pillar" style="left:28%; height:65%; animation-delay:1s;"></div>
+      <div class="light-pillar" style="left:72%; height:50%; animation-delay:0.5s;"></div>
+      <div class="light-pillar" style="left:85%; height:60%; animation-delay:1.8s;"></div>
+      <div class="corner corner-tl"></div>
+      <div class="corner corner-br"></div>
+      <div class="section-num">第 五 章</div>
+      <div class="quote" style="font-size:56px;">
+        新时代的号角已经吹响<br>
+        民族复兴的画卷正在展开
+      </div>
+      <div class="gold-line"></div>
+      <p class="verse" style="font-size:29px;">
+        我们不应做旁观者，而要做<span class="highlight">追梦人</span><br>
+        让青春在奋斗中闪光 · 让理想在实践中扎根
+      </p>
+      <div class="attribution" style="font-size:19px;">微光汇聚，终成星河 · 青春奔涌，必有回响</div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 6: 誓言·高潮 ============ -->
+  <section data-screen-label="06 誓言">
+    <div class="slide-inner bg-oath">
+      <div class="light-rays" style="animation-duration:40s; opacity:0.9;"></div>
+      <div class="tiananmen-wrap" style="width:90%; bottom:-8px; opacity:0.32;">
+        <svg viewBox="0 0 1200 480" width="100%" height="auto" preserveAspectRatio="xMidYMax slice">
+          <use href="#tiananmen"/>
+        </svg>
+      </div>
+      <!-- Light pillars -->
+      <div class="light-pillar" style="left:18%; height:70%; animation-delay:0s;"></div>
+      <div class="light-pillar" style="left:32%; height:80%; animation-delay:1.2s;"></div>
+      <div class="light-pillar" style="left:68%; height:80%; animation-delay:0.6s;"></div>
+      <div class="light-pillar" style="left:82%; height:70%; animation-delay:1.8s;"></div>
+      <div class="corner corner-tl"></div>
+      <div class="corner corner-tr"></div>
+      <div class="corner corner-bl"></div>
+      <div class="corner corner-br"></div>
+      <div class="section-num" style="color:rgba(240,200,130,0.8);">终 章</div>
+      <div class="oath-text">
+        请党放心<br>
+        强国有我
+      </div>
+      <div class="gold-line gold-line-wide"></div>
+      <p class="oath-sub">怀赤诚之心 · 走奋进之路</p>
+      <p class="verse" style="font-size:24px; margin-top:20px; max-width:1100px;">
+        用青春书写无愧于祖国、无愧于人民、无愧于时代的精彩篇章
+      </p>
+    </div>
+  </section>
+
+</deck-stage>
+
+<!-- ===== deck_stage.js inline ===== -->
+<script>
+(function() {
+  const STORAGE_KEY_PREFIX = 'deck-stage-slide-';
+  class DeckStage extends HTMLElement {
+    constructor() {
+      super();
+      this.attachShadow({ mode: 'open' });
+      this._currentSlide = 0; this._slides = [];
+      this._storageKey = STORAGE_KEY_PREFIX + (location.pathname || 'default');
+    }
+    connectedCallback() {
+      this._width = parseInt(this.getAttribute('width')) || 1920;
+      this._height = parseInt(this.getAttribute('height')) || 1080;
+      this._render();
+      const init = () => {
+        this._collectSlides(); this._setupEventListeners();
+        this._restoreSlide(); this._updateDisplay(); this._setupPrintStyles();
+      };
+      if (this.ownerDocument.readyState === 'loading') {
+        this.ownerDocument.addEventListener('DOMContentLoaded', init, { once: true });
+      } else { requestAnimationFrame(init); }
+    }
+    _render() {
+      this.shadowRoot.innerHTML = `
+        <style>
+          :host { display:block; position:fixed; inset:0; background:#000; overflow:hidden; font-family:-apple-system,'PingFang SC',sans-serif; }
+          :host([noscale]) .stage { transform:none!important; top:0!important; left:0!important; }
+          .stage { position:absolute; top:50%; left:50%; transform-origin:top left; will-change:transform; background:#0a0000; }
+          .slide-wrapper { width:100%; height:100%; position:relative; }
+          ::slotted(section) { display:none; width:100%; height:100%; position:absolute; top:0; left:0; overflow:hidden; }
+          ::slotted(section.active) { display:block; }
+          .counter { position:fixed; bottom:20px; right:20px; background:rgba(0,0,0,0.45); color:rgba(255,255,255,0.45); padding:4px 10px; border-radius:999px; font-size:11px; font-variant-numeric:tabular-nums; z-index:100; user-select:none; opacity:0.35; transition:opacity 0.3s; }
+          .counter:hover { opacity:1; }
+          .nav-zone { position:fixed; top:0; bottom:0; width:10%; cursor:pointer; z-index:50; }
+          .nav-zone.left { left:0; } .nav-zone.right { right:0; }
+          .nav-hint { position:absolute; top:50%; transform:translateY(-50%); width:36px; height:36px; border-radius:999px; background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.35); display:flex; align-items:center; justify-content:center; font-size:20px; opacity:0; transition:opacity 0.3s; }
+          .nav-zone.left .nav-hint { left:14px; } .nav-zone.right .nav-hint { right:14px; }
+          .nav-zone:hover .nav-hint { opacity:1; }
+          @media print {
+            :host { position:static; background:#fff; }
+            .counter, .nav-zone { display:none!important; }
+            .stage { position:static; transform:none!important; page-break-after:always; }
+            ::slotted(section) { display:block!important; position:relative!important; page-break-after:always; width:100%; height:100%; }
+          }
+        </style>
+        <div class="stage" id="stage" style="width:${this._width}px; height:${this._height}px;">
+          <div class="slide-wrapper"><slot></slot></div>
+        </div>
+        <div class="nav-zone left" id="navLeft"><div class="nav-hint">‹</div></div>
+        <div class="nav-zone right" id="navRight"><div class="nav-hint">›</div></div>
+        <div class="counter" id="counter">1 / 1</div>
+      `;
+    }
+    _collectSlides() {
+      this._slides = Array.from(this.querySelectorAll(':scope > section'));
+      this._slides.forEach((s, i) => { if (!s.hasAttribute('data-screen-label')) s.setAttribute('data-screen-label', String(i+1).padStart(2,'0')); });
+    }
+    _setupEventListeners() {
+      window.addEventListener('resize', () => this._updateScale());
+      document.addEventListener('keydown', (e) => {
+        if (e.target.matches('input, textarea, [contenteditable]')) return;
+        switch(e.key) {
+          case 'ArrowRight': case ' ': case 'PageDown': e.preventDefault(); this.next(); break;
+          case 'ArrowLeft': case 'PageUp': e.preventDefault(); this.prev(); break;
+          case 'Home': e.preventDefault(); this.goTo(0); break;
+          case 'End': e.preventDefault(); this.goTo(this._slides.length-1); break;
+        }
+      });
+      this.shadowRoot.getElementById('navLeft').addEventListener('click', () => this.prev());
+      this.shadowRoot.getElementById('navRight').addEventListener('click', () => this.next());
+      window.addEventListener('hashchange', () => this._handleHash());
+      if (location.hash) setTimeout(() => this._handleHash(), 0);
+    }
+    _handleHash() {
+      const m = location.hash.match(/^#slide-(\d+)$/);
+      if (m) { const i = parseInt(m[1])-1; if (i>=0 && i<this._slides.length) this.goTo(i); }
+    }
+    _restoreSlide() {
+      try { const s = localStorage.getItem(this._storageKey); if (s!==null) { const i = parseInt(s); if (i>=0 && i<this._slides.length) this._currentSlide = i; } } catch(e) {}
+    }
+    _saveSlide() { try { localStorage.setItem(this._storageKey, String(this._currentSlide)); } catch(e) {} }
+    _updateScale() {
+      if (this.hasAttribute('noscale')) { const s = this.shadowRoot.getElementById('stage'); s.style.transform='none'; s.style.top='0'; s.style.left='0'; return; }
+      const stage = this.shadowRoot.getElementById('stage'); if (!stage) return;
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const scale = Math.min(vw/this._width, vh/this._height);
+      stage.style.transform = `translate(${(vw-this._width*scale)/2}px, ${(vh-this._height*scale)/2}px) scale(${scale})`;
+      stage.style.top='0'; stage.style.left='0';
+    }
+    _updateDisplay() {
+      this._slides.forEach((s,i) => s.classList.toggle('active', i===this._currentSlide));
+      const c = this.shadowRoot.getElementById('counter');
+      if (c) c.textContent = `${this._currentSlide+1} / ${this._slides.length}`;
+      this._updateScale();
+      try { window.postMessage({ slideIndexChanged: this._currentSlide, totalSlides: this._slides.length }, '*'); } catch(e) {}
+    }
+    _setupPrintStyles() {
+      const ps = document.createElement('style');
+      ps.textContent = `@media print{@page{size:${this._width}px ${this._height}px;margin:0;}body{margin:0;padding:0;}deck-stage{position:static!important;}deck-stage>section{display:block!important;position:relative!important;width:${this._width}px!important;height:${this._height}px!important;page-break-after:always;overflow:hidden;}deck-stage>section:last-child{page-break-after:auto;}}`;
+      document.head.appendChild(ps);
+    }
+    next() { if (this._currentSlide < this._slides.length-1) { this._currentSlide++; this._saveSlide(); this._updateDisplay(); } }
+    prev() { if (this._currentSlide > 0) { this._currentSlide--; this._saveSlide(); this._updateDisplay(); } }
+    goTo(i) { if (i>=0 && i<this._slides.length) { this._currentSlide = i; this._saveSlide(); this._updateDisplay(); } }
+    get currentSlide() { return this._currentSlide; }
+    get totalSlides() { return this._slides.length; }
+  }
+  customElements.define('deck-stage', DeckStage);
+})();
+</script>
+
+<!-- ===== Enhanced Particle System ===== -->
+<script>
+(function() {
+  const canvas = document.getElementById('particleCanvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+  const COUNT = 120;
+
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  window.addEventListener('resize', resize); resize();
+
+  class Particle {
+    constructor(type) {
+      this.type = type || 'dust';
+      this.reset(true);
+    }
+    reset(initial) {
+      this.x = Math.random() * W;
+      this.y = initial ? Math.random() * H : H + 30;
+      if (this.type === 'dust') {
+        this.size = Math.random() * 2.2 + 0.5;
+        this.speedY = -(Math.random() * 0.35 + 0.12);
+        this.speedX = (Math.random() - 0.5) * 0.25;
+        this.opacity = Math.random() * 0.45 + 0.12;
+        this.opacitySpeed = (Math.random() - 0.5) * 0.007;
+        this.hue = Math.random() < 0.65 ? 38 + Math.random() * 20 : 6 + Math.random() * 14;
+        this.saturation = 60 + Math.random() * 40;
+        this.lightness = 55 + Math.random() * 42;
+      } else if (this.type === 'sparkle') {
+        this.size = Math.random() * 1.5 + 0.3;
+        this.speedY = -(Math.random() * 0.5 + 0.2);
+        this.speedX = (Math.random() - 0.5) * 0.4;
+        this.opacity = 0;
+        this.targetOpacity = Math.random() * 0.7 + 0.3;
+        this.phase = Math.random() * Math.PI * 2;
+        this.phaseSpeed = Math.random() * 0.04 + 0.02;
+        this.hue = 40 + Math.random() * 15;
+        this.saturation = 80 + Math.random() * 20;
+        this.lightness = 70 + Math.random() * 28;
+        this.life = 0;
+        this.maxLife = 100 + Math.random() * 200;
+      } else if (this.type === 'orb') {
+        this.size = Math.random() * 20 + 8;
+        this.speedY = -(Math.random() * 0.15 + 0.05);
+        this.speedX = (Math.random() - 0.5) * 0.1;
+        this.opacity = Math.random() * 0.12 + 0.03;
+        this.hue = 38 + Math.random() * 20;
+        this.saturation = 70 + Math.random() * 30;
+        this.lightness = 65 + Math.random() * 30;
+        this.pulse = Math.random() * Math.PI * 2;
+        this.pulseSpeed = Math.random() * 0.015 + 0.005;
+      }
+      this.twinkle = Math.random() * Math.PI * 2;
+      this.twinkleSpeed = Math.random() * 0.025 + 0.006;
+    }
+    update() {
+      this.y += this.speedY;
+      this.x += this.speedX + Math.sin(this.twinkle) * 0.12;
+      this.twinkle += this.twinkleSpeed;
+      if (this.type === 'sparkle') {
+        this.life++;
+        this.opacity = this.targetOpacity * Math.sin((this.life / this.maxLife) * Math.PI);
+        if (this.life >= this.maxLife) this.reset(false);
+      } else if (this.type === 'dust') {
+        this.opacity += this.opacitySpeed;
+        if (this.opacity > 0.6) this.opacitySpeed = -Math.abs(this.opacitySpeed);
+        if (this.opacity < 0.06) this.opacitySpeed = Math.abs(this.opacitySpeed);
+        if (this.y < -30 || this.x < -30 || this.x > W + 30) this.reset(false);
+      } else if (this.type === 'orb') {
+        this.pulse += this.pulseSpeed;
+        if (this.y < -60 || this.x < -60 || this.x > W + 60) this.reset(false);
+      }
+    }
+    draw(ctx) {
+      if (this.type === 'orb') {
+        const pulseAlpha = this.opacity * (0.7 + 0.3 * Math.sin(this.pulse));
+        const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+        grad.addColorStop(0, `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${pulseAlpha})`);
+        grad.addColorStop(0.5, `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${pulseAlpha * 0.3})`);
+        grad.addColorStop(1, 'transparent');
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+      } else {
+        const alpha = this.opacity * (0.7 + 0.3 * Math.sin(this.twinkle));
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${alpha})`;
+        ctx.fill();
+        if (this.size > 1.5 && this.type === 'dust') {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${alpha * 0.1})`;
+          ctx.fill();
+        }
+      }
+    }
+  }
+
+  for (let i = 0; i < COUNT; i++) {
+    const r = Math.random();
+    particles.push(new Particle(r < 0.55 ? 'dust' : r < 0.85 ? 'sparkle' : 'orb'));
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => { p.update(); p.draw(ctx); });
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+</script>
+
+<!-- ===== Audio System ===== -->
+<script>
+(function() {
+  let audioCtx = null, ambientNodes = [], ambientOn = true;
+  let musicAudio = null, musicGain = null;
+
+  function initAudio() {
+    if (audioCtx) return;
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)(); window._audioCtxRef = audioCtx;
+      createAmbient();
+    } catch(e) { console.warn('Web Audio不可用'); }
+  }
+
+  function createAmbient() {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const master = audioCtx.createGain();
+    master.gain.value = 0.055; master.connect(audioCtx.destination);
+    ambientNodes.push(master);
+
+    [{f:73.42,g:0.32,d:0},{f:110,g:0.2,d:3},{f:146.83,g:0.1,d:-2}].forEach(c => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type='sine'; o.frequency.value=c.f; o.detune.value=c.d;
+      g.gain.value=0; g.gain.setTargetAtTime(c.g, now+0.5, 2.5);
+      o.connect(g); g.connect(master); o.start(now);
+      ambientNodes.push(o, g);
+    });
+
+    const saw = audioCtx.createOscillator(), sf = audioCtx.createBiquadFilter(), sg = audioCtx.createGain();
+    saw.type='sawtooth'; saw.frequency.value=73.42; sf.type='lowpass'; sf.frequency.value=260; sf.Q.value=0.5;
+    sg.gain.value=0; sg.gain.setTargetAtTime(0.035, now+1, 3);
+    saw.connect(sf); sf.connect(sg); sg.connect(master); saw.start(now);
+    ambientNodes.push(saw, sf, sg);
+
+    const lfo = audioCtx.createOscillator(), lg = audioCtx.createGain();
+    lfo.type='sine'; lfo.frequency.value=0.065; lg.gain.value=18;
+    lfo.connect(lg); lg.connect(saw.detune); lfo.start(now);
+    ambientNodes.push(lfo, lg);
+
+    try {
+      const buf = audioCtx.createBuffer(1, 2*audioCtx.sampleRate, audioCtx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i=0; i<d.length; i++) d[i]=Math.random()*2-1;
+      const n = audioCtx.createBufferSource(); n.buffer=buf; n.loop=true;
+      const nf = audioCtx.createBiquadFilter(), ng = audioCtx.createGain();
+      nf.type='bandpass'; nf.frequency.value=2600; nf.Q.value=0.3;
+      ng.gain.value=0; ng.gain.setTargetAtTime(0.012, now+2, 4);
+      n.connect(nf); nf.connect(ng); ng.connect(master); n.start(now);
+      ambientNodes.push(n, nf, ng);
+    } catch(e) {}
+
+    ambientNodes._masterGain = master;
+  }
+
+  function toggleAmbient() {
+    ambientOn = !ambientOn;
+    const m = ambientNodes._masterGain;
+    if (m) m.gain.setTargetAtTime(ambientOn?0.055:0, audioCtx.currentTime, 1.5);
+    if (musicGain) musicGain.gain.setTargetAtTime(ambientOn?0.7:0, audioCtx?audioCtx.currentTime:0, 1);
+    // Also toggle embedded BGM
+    var bgm = document.getElementById('bgmAudio');
+    if (bgm) {
+      if (ambientOn) bgm.play().catch(function(){});
+      else bgm.pause();
+    }
+    const b = document.getElementById('btnMusic');
+    if (b) b.classList.toggle('active', ambientOn);
+  }
+
+  function loadMusicFile(file) {
+    if (!file) return;
+    initAudio();
+    const url = URL.createObjectURL(file);
+    if (musicAudio) { musicAudio.pause(); musicAudio.src=''; if (musicGain) musicGain.disconnect(); }
+    musicAudio = new Audio(url); musicAudio.loop=true; musicAudio.volume=0;
+    if (audioCtx) {
+      const src = audioCtx.createMediaElementSource(musicAudio);
+      musicGain = audioCtx.createGain(); musicGain.gain.value=0.7;
+      src.connect(musicGain); musicGain.connect(audioCtx.destination);
+    }
+    musicAudio.play().catch(()=>{});
+    if (ambientNodes._masterGain && audioCtx) ambientNodes._masterGain.gain.setTargetAtTime(0.018, audioCtx.currentTime, 2);
+    document.getElementById('btnMusic').classList.add('active');
+    ambientOn = true;
+    showToast('背景音乐已加载 ✓');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('musicToast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(t._timeout);
+    t._timeout = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  window._audioInit = initAudio;
+  window._audioToggle = toggleAmbient;
+  window._audioLoadFile = loadMusicFile;
+})();
+
+function handleMusicFile(i) { const f = i.files[0]; if (f) window._audioLoadFile(f); }
+</script>
+
+<!-- ===== Auto-advance & Controls ===== -->
+<script>
+(function() {
+  let autoAdvance = true, advanceInterval = 30000, timerId = null, remainingMs = 30000, lastTick = 0;
+  function getDeck() { return document.querySelector('deck-stage'); }
+  function updateTimerDisplay() {
+    const e = document.getElementById('timerDisplay');
+    if (e) e.textContent = Math.ceil(remainingMs/1000) + 's';
+  }
+  function resetTimer() { remainingMs = advanceInterval; lastTick = Date.now(); updateTimerDisplay(); }
+  function startTimer() {
+    stopTimer(); if (!autoAdvance) return;
+    lastTick = Date.now();
+    timerId = setInterval(() => {
+      const now = Date.now(); remainingMs -= (now - lastTick); lastTick = now;
+      if (remainingMs <= 0) {
+        const d = getDeck();
+        if (d && d.currentSlide < d.totalSlides-1) { d.next(); resetTimer(); }
+        else { remainingMs = 0; updateTimerDisplay(); }
+      }
+      updateTimerDisplay();
+    }, 250);
+  }
+  function stopTimer() { if (timerId) { clearInterval(timerId); timerId = null; } }
+  function toggleAuto() {
+    autoAdvance = !autoAdvance;
+    const b = document.getElementById('btnAuto');
+    if (b) { b.classList.toggle('active', autoAdvance); b.textContent = autoAdvance ? '⏯ 自动' : '▶ 手动'; }
+    if (autoAdvance) { resetTimer(); startTimer(); }
+    else { stopTimer(); document.getElementById('timerDisplay').textContent = '手动'; }
+  }
+  function hookDeckNav() {
+    const d = getDeck(); if (!d) return setTimeout(hookDeckNav, 100);
+    const on = d.next.bind(d), op = d.prev.bind(d), og = d.goTo.bind(d);
+    d.next = function() { on(); resetTimer(); };
+    d.prev = function() { op(); resetTimer(); };
+    d.goTo = function(i) { og(i); resetTimer(); };
+  }
+  document.getElementById('btnPrev').addEventListener('click', () => { const d = getDeck(); if (d) d.prev(); });
+  document.getElementById('btnNext').addEventListener('click', () => { const d = getDeck(); if (d) d.next(); });
+  document.getElementById('btnAuto').addEventListener('click', toggleAuto);
+  document.getElementById('btnSpeedDown').addEventListener('click', () => {
+    advanceInterval = Math.max(10000, advanceInterval-5000); resetTimer();
+    if (autoAdvance) { stopTimer(); startTimer(); } updateTimerDisplay();
+  });
+  document.getElementById('btnSpeedUp').addEventListener('click', () => {
+    advanceInterval = Math.min(120000, advanceInterval+5000); resetTimer();
+    if (autoAdvance) { stopTimer(); startTimer(); } updateTimerDisplay();
+  });
+  document.getElementById('btnMusic').addEventListener('click', () => { window._audioInit(); window._audioToggle(); });
+  document.getElementById('btnLoadMusic').addEventListener('click', () => { document.getElementById('musicFileInput').click(); });
+
+  const controlBar = document.getElementById('controlBar');
+  let hideTimeout;
+  document.addEventListener('mousemove', (e) => {
+    if (e.clientY > window.innerHeight-80) {
+      controlBar.classList.add('visible');
+      clearTimeout(hideTimeout);
+      hideTimeout = setTimeout(() => controlBar.classList.remove('visible'), 4000);
+    }
+  });
+  controlBar.addEventListener('mouseenter', () => { clearTimeout(hideTimeout); controlBar.classList.add('visible'); });
+  controlBar.addEventListener('mouseleave', () => { hideTimeout = setTimeout(() => controlBar.classList.remove('visible'), 1500); });
+
+  document.addEventListener('dragover', (e) => { e.preventDefault(); });
+  document.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('audio/')) window._audioLoadFile(f);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.matches('input, textarea, [contenteditable]')) return;
+    if (e.key==='m'||e.key==='M') { window._audioInit(); window._audioToggle(); }
+    if (e.key==='a'||e.key==='A') toggleAuto();
+  });
+
+  window._startPresentation = function() {
+    document.getElementById('startOverlay').classList.add('fadeout');
+    window._audioInit();
+    // Auto-play embedded BGM (bgm.ogg)
+    try {
+      var bgm = document.getElementById('bgmAudio');
+      if (bgm) { bgm.volume = 0.65; bgm.play().catch(function(){}); }
+    } catch(e) {}
+    hookDeckNav(); resetTimer(); startTimer(); updateTimerDisplay();
+    document.getElementById('btnAuto').classList.add('active');
+    document.getElementById('btnMusic').classList.add('active');
+    controlBar.classList.add('visible');
+    setTimeout(() => controlBar.classList.remove('visible'), 3000);
+  };
+
+  window.addEventListener('message', (e) => { if (e.data && typeof e.data.slideIndexChanged==='number') resetTimer(); });
+})();
+
+function startPresentation() { if (window._startPresentation) window._startPresentation(); }
+</script>
+
+<!-- ===== Embedded Background Music ===== -->
+<audio id="bgmAudio" src="bgm.ogg" loop preload="auto" style="display:none"></audio>
+
+</body>
+</html>
